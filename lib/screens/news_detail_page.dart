@@ -6,6 +6,7 @@ import '../providers/auth_provider.dart';
 import '../providers/news_provider.dart';
 import '../providers/bookmark_provider.dart';
 import '../widgets/auth_dialog.dart';
+import '../widgets/user_display.dart';
 
 class NewsDetailPage extends StatefulWidget {
   final String newsId;
@@ -48,12 +49,12 @@ class _NewsDetailPageState extends State<NewsDetailPage> {
     final isBookmarked = bookmarkProv.bookmarkedIds.contains(widget.newsId);
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      // backgroundColor: Colors.white, // Use theme default
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        // backgroundColor: Colors.white, // Use theme default
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.black),
+          icon: Icon(Icons.arrow_back), // Uses IconTheme
           onPressed: () => Navigator.pop(context),
         ),
         actions: [
@@ -140,7 +141,7 @@ class _NewsDetailPageState extends State<NewsDetailPage> {
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
                           height: 1.3,
-                          color: Colors.black87,
+                          // color: Colors.black87, // Use theme
                         ),
                       ),
                       SizedBox(height: 12),
@@ -165,19 +166,14 @@ class _NewsDetailPageState extends State<NewsDetailPage> {
                       // Author Section
                       Row(
                         children: [
-                          CircleAvatar(
-                            radius: 20,
-                            backgroundColor: Colors.grey[200],
-                            backgroundImage:
-                                null, // No author photo in news model yet, keeping generic
-                            child: Icon(Icons.person, color: Colors.grey),
-                          ),
+                          UserAvatar(userId: data['authorId'] ?? ''),
                           SizedBox(width: 12),
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
-                                data['authorName'] ?? 'Unknown',
+                              UserDisplay(
+                                userId: data['authorId'] ?? '',
+                                fallbackName: data['authorName'] ?? 'Unknown',
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 14,
@@ -202,7 +198,7 @@ class _NewsDetailPageState extends State<NewsDetailPage> {
                         style: TextStyle(
                           fontSize: 16,
                           height: 1.6,
-                          color: Colors.black87,
+                          // color: Colors.black87, // Use theme
                         ),
                       ),
                       SizedBox(height: 30),
@@ -239,7 +235,7 @@ class _NewsDetailPageState extends State<NewsDetailPage> {
                                   vertical: 12,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: Colors.grey[100],
+                                  color: Theme.of(context).cardColor,
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 child: Text(
@@ -287,18 +283,10 @@ class _NewsDetailPageState extends State<NewsDetailPage> {
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children: [
-                                      CircleAvatar(
+                                      UserAvatar(
+                                        userId: m['userId'] ?? '',
                                         radius: 16,
                                         backgroundColor: Colors.purple.shade100,
-                                        child: Text(
-                                          (m['userName'] ?? 'A')[0]
-                                              .toUpperCase(),
-                                          style: TextStyle(
-                                            color: Colors.purple,
-                                            fontSize: 12,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
                                       ),
                                       SizedBox(width: 12),
                                       Expanded(
@@ -311,8 +299,11 @@ class _NewsDetailPageState extends State<NewsDetailPage> {
                                                   MainAxisAlignment
                                                       .spaceBetween,
                                               children: [
-                                                Text(
-                                                  m['userName'] ?? 'Anonymous',
+                                                UserDisplay(
+                                                  userId: m['userId'] ?? '',
+                                                  fallbackName:
+                                                      m['userName'] ??
+                                                      'Anonymous',
                                                   style: TextStyle(
                                                     fontWeight: FontWeight.bold,
                                                     fontSize: 13,
@@ -370,7 +361,7 @@ class _NewsDetailPageState extends State<NewsDetailPage> {
                                               m['content'] ?? '',
                                               style: TextStyle(
                                                 fontSize: 13,
-                                                color: Colors.grey[800],
+                                                // color: Colors.grey[800], // Use theme default
                                                 height: 1.4,
                                               ),
                                             ),
@@ -486,9 +477,11 @@ class _CommentInputState extends State<_CommentInput> {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 4),
       decoration: BoxDecoration(
-        color: Colors.grey[50],
+        color: Theme.of(context).cardColor, // Dynamic card color
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey[200]!),
+        border: Border.all(
+          color: Theme.of(context).dividerColor, // Dynamic border
+        ),
       ),
       child: Row(
         children: [

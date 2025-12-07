@@ -132,19 +132,19 @@ class _AddNewsPageState extends State<AddNewsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      // backgroundColor: Colors.white, // Use theme
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        // backgroundColor: Colors.white, // Use theme
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.black),
+          icon: Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
         ),
         centerTitle: true,
         title: Text(
           'Add News',
           style: TextStyle(
-            color: Colors.black,
+            // color: Colors.black, // Use theme
             fontWeight: FontWeight.bold,
             fontSize: 18,
           ),
@@ -173,7 +173,7 @@ class _AddNewsPageState extends State<AddNewsPage> {
                   width: double.infinity,
                   height: 180,
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: Theme.of(context).cardColor,
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: _image == null
@@ -183,7 +183,11 @@ class _AddNewsPageState extends State<AddNewsPage> {
                             Container(
                               padding: EdgeInsets.all(12),
                               decoration: BoxDecoration(
-                                color: Colors.grey[100],
+                                color:
+                                    Theme.of(context).brightness ==
+                                        Brightness.dark
+                                    ? Colors.grey[800]
+                                    : Colors.grey[100],
                                 shape: BoxShape.circle,
                               ),
                               child: Icon(
@@ -197,7 +201,7 @@ class _AddNewsPageState extends State<AddNewsPage> {
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 14,
-                                color: Colors.black87,
+                                // color: Colors.black87, // Use theme
                               ),
                             ),
                             SizedBox(height: 6),
@@ -317,6 +321,7 @@ class _AddNewsPageState extends State<AddNewsPage> {
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
+                          color: Colors.white,
                         ),
                       ),
               ),

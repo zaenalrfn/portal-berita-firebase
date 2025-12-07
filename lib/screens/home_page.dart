@@ -6,6 +6,7 @@ import '../providers/news_provider.dart';
 import '../widgets/news_card.dart';
 import '../providers/auth_provider.dart';
 import '../widgets/auth_dialog.dart';
+import '../widgets/user_display.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -67,10 +68,10 @@ class _HomePageState extends State<HomePage> {
           }).toList();
 
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      // backgroundColor: Colors.grey[50], // Use theme default
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        backgroundColor: Colors.white,
+        // backgroundColor: Colors.white, // Use theme default
         elevation: 0,
         title: _isSearchVisible
             ? TextField(
@@ -84,7 +85,7 @@ class _HomePageState extends State<HomePage> {
             : Text(
                 'Portal',
                 style: TextStyle(
-                  color: Colors.black87,
+                  // color: Colors.black87, // Use theme default
                   fontWeight: FontWeight.bold,
                   fontSize: 22,
                 ),
@@ -93,7 +94,7 @@ class _HomePageState extends State<HomePage> {
           IconButton(
             icon: Icon(
               _isSearchVisible ? Icons.close : Icons.search,
-              color: Colors.black87,
+              // color: Colors.black87, // Use theme default
             ),
             onPressed: () {
               setState(() {
@@ -138,7 +139,7 @@ class _HomePageState extends State<HomePage> {
                 children: [
                   // Header Section
                   Container(
-                    color: Colors.white,
+                    color: Theme.of(context).cardColor,
                     padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -152,7 +153,7 @@ class _HomePageState extends State<HomePage> {
                               style: TextStyle(
                                 fontSize: 24,
                                 fontWeight: FontWeight.bold,
-                                color: Colors.black87,
+                                // color: Colors.black87, // Use theme default
                               ),
                             );
                           },
@@ -172,7 +173,11 @@ class _HomePageState extends State<HomePage> {
                           children: [
                             Container(
                               decoration: BoxDecoration(
-                                color: Colors.grey[200],
+                                color:
+                                    Theme.of(context).brightness ==
+                                        Brightness.dark
+                                    ? Colors.grey[800]
+                                    : Colors.grey[200],
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: Row(
@@ -180,7 +185,8 @@ class _HomePageState extends State<HomePage> {
                                   IconButton(
                                     icon: Icon(Icons.list),
                                     color: !_isGridView
-                                        ? Colors.blue
+                                        ? Colors
+                                              .blue // Active color (blue is fine)
                                         : Colors.grey,
                                     onPressed: () =>
                                         setState(() => _isGridView = false),
@@ -296,7 +302,7 @@ class _HomePageState extends State<HomePage> {
     return Card(
       margin: EdgeInsets.only(bottom: 12),
       elevation: 0,
-      color: Colors.white,
+      // color: Colors.white, // Use theme default
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: InkWell(
         onTap: () =>
@@ -319,7 +325,9 @@ class _HomePageState extends State<HomePage> {
                     : Container(
                         width: 80,
                         height: 80,
-                        color: Colors.grey[200],
+                        color: Theme.of(context).brightness == Brightness.dark
+                            ? Colors.grey[800]
+                            : Colors.grey[200],
                         child: Icon(Icons.image, color: Colors.grey),
                       ),
               ),
@@ -328,8 +336,9 @@ class _HomePageState extends State<HomePage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      news.authorName,
+                    UserDisplay(
+                      userId: news.authorId,
+                      fallbackName: news.authorName,
                       style: TextStyle(
                         fontSize: 10,
                         color: Colors.grey[600],
@@ -342,7 +351,7 @@ class _HomePageState extends State<HomePage> {
                       style: TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.bold,
-                        color: Colors.black87,
+                        // color: Colors.black87, // Use theme
                       ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
@@ -389,7 +398,9 @@ class _HomePageState extends State<HomePage> {
                       fit: BoxFit.cover,
                     )
                   : Container(
-                      color: Colors.grey[200],
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? Colors.grey[800]
+                          : Colors.grey[200],
                       child: Center(child: Icon(Icons.image)),
                     ),
             ),

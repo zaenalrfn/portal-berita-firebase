@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import '../providers/auth_provider.dart';
 import '../providers/news_provider.dart';
-import '../widgets/auth_dialog.dart';
+import '../widgets/guest_placeholder.dart';
 
 class MyNewsPage extends StatefulWidget {
   @override
@@ -59,28 +59,20 @@ class _MyNewsPageState extends State<MyNewsPage> {
           elevation: 0,
           foregroundColor: Colors.black,
         ),
-        body: Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text('Viewing as guest'),
-              SizedBox(height: 8),
-              ElevatedButton(
-                onPressed: () =>
-                    showDialog(context: context, builder: (_) => AuthDialog()),
-                child: Text('Login to manage your news'),
-              ),
-            ],
-          ),
+        body: GuestPlaceholder(
+          title: 'Start Publishing',
+          message:
+              'As a guest, you can\'t post news. Login to share your stories with the world!',
+          icon: Icons.feed_outlined,
         ),
       );
     }
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      // backgroundColor: Colors.white, // Use theme
       appBar: AppBar(
         toolbarHeight: 0, // Custom header in body
-        backgroundColor: Colors.white,
+        // backgroundColor: Colors.white, // Use theme
         elevation: 0,
       ),
       body: SafeArea(
@@ -100,7 +92,7 @@ class _MyNewsPageState extends State<MyNewsPage> {
                     style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.w900,
-                      color: Colors.black,
+                      // color: Colors.black, // Use theme
                     ),
                   ),
                   InkWell(
@@ -213,118 +205,156 @@ class _MyNewsPageState extends State<MyNewsPage> {
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            // Thumbnail
-                            Container(
-                              width: 80,
-                              height: 80,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(12),
-                                color: Colors.grey[200],
-                                image: (coverUrl != null && coverUrl.isNotEmpty)
-                                    ? DecorationImage(
-                                        image: NetworkImage(coverUrl),
-                                        fit: BoxFit.cover,
-                                      )
-                                    : null,
-                              ),
-                              child: (coverUrl == null || coverUrl.isEmpty)
-                                  ? Icon(Icons.image, color: Colors.grey)
-                                  : null,
-                            ),
-                            SizedBox(width: 16),
-
-                            // Info
                             Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text(
-                                    title,
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 14,
-                                      color: Colors.black87,
+                              child: InkWell(
+                                onTap: () {
+                                  Navigator.pushNamed(
+                                    context,
+                                    '/detail',
+                                    arguments: {'id': id},
+                                  );
+                                },
+                                child: Row(
+                                  children: [
+                                    // Thumbnail
+                                    Container(
+                                      width: 80,
+                                      height: 80,
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(12),
+                                        color:
+                                            Theme.of(context).brightness ==
+                                                Brightness.dark
+                                            ? Colors.grey[800]
+                                            : Colors.grey[200],
+                                        image:
+                                            (coverUrl != null &&
+                                                coverUrl.isNotEmpty)
+                                            ? DecorationImage(
+                                                image: NetworkImage(coverUrl),
+                                                fit: BoxFit.cover,
+                                              )
+                                            : null,
+                                      ),
+                                      child:
+                                          (coverUrl == null || coverUrl.isEmpty)
+                                          ? Icon(
+                                              Icons.image,
+                                              color: Colors.grey,
+                                            )
+                                          : null,
                                     ),
-                                  ),
-                                  SizedBox(height: 6),
-                                  Text(
-                                    _formatTimeAgo(createdAt),
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      color: Colors.grey,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
+                                    SizedBox(width: 16),
 
-                            // Actions
-                            Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                InkWell(
-                                  onTap: () {
-                                    Navigator.pushNamed(
-                                      context,
-                                      '/edit_news',
-                                      arguments: {
-                                        'id': id,
-                                        'title': title,
-                                        'content': d['content'],
-                                        'coverUrl': coverUrl,
-                                      },
-                                    );
-                                  },
-                                  child: Icon(
-                                    Icons.edit,
-                                    size: 20,
-                                    color: Colors.grey[600],
-                                  ),
-                                ),
-                                SizedBox(height: 16),
-                                InkWell(
-                                  onTap: () async {
-                                    final confirm = await showDialog(
-                                      context: context,
-                                      builder: (_) => AlertDialog(
-                                        title: Text('Delete News?'),
-                                        content: Text('This cannot be undone.'),
-                                        actions: [
-                                          TextButton(
-                                            onPressed: () =>
-                                                Navigator.pop(context, false),
-                                            child: Text('Cancel'),
+                                    // Info
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          Text(
+                                            title,
+                                            maxLines: 2,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 14,
+                                              // color: Colors.black87, // Use theme default
+                                            ),
                                           ),
-                                          TextButton(
-                                            onPressed: () =>
-                                                Navigator.pop(context, true),
-                                            child: Text(
-                                              'Delete',
-                                              style: TextStyle(
-                                                color: Colors.red,
-                                              ),
+                                          SizedBox(height: 6),
+                                          Text(
+                                            _formatTimeAgo(createdAt),
+                                            style: TextStyle(
+                                              fontSize: 12,
+                                              color: Colors.grey,
                                             ),
                                           ),
                                         ],
                                       ),
-                                    );
-                                    if (confirm == true) {
-                                      await Provider.of<NewsProvider>(
-                                        context,
-                                        listen: false,
-                                      ).deleteNews(id);
-                                    }
-                                  },
-                                  child: Icon(
-                                    Icons.delete_outline,
-                                    size: 20,
-                                    color: Colors.grey[600],
-                                  ),
+                                    ),
+                                  ],
                                 ),
-                              ],
+                              ),
+                            ),
+
+                            // Actions
+                            Container(
+                              padding: EdgeInsets.only(left: 8),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  InkWell(
+                                    onTap: () {
+                                      Navigator.pushNamed(
+                                        context,
+                                        '/edit_news',
+                                        arguments: {
+                                          'id': id,
+                                          'title': title,
+                                          'content': d['content'],
+                                          'coverUrl': coverUrl,
+                                        },
+                                      );
+                                    },
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(4.0),
+                                      child: Icon(
+                                        Icons.edit,
+                                        size: 20,
+                                        color: Colors.grey[600],
+                                      ),
+                                    ),
+                                  ),
+                                  SizedBox(height: 8),
+                                  InkWell(
+                                    onTap: () async {
+                                      final confirm = await showDialog(
+                                        context: context,
+                                        builder: (_) => AlertDialog(
+                                          title: Text('Delete News?'),
+                                          content: Text(
+                                            'This cannot be undone.',
+                                          ),
+                                          actions: [
+                                            TextButton(
+                                              onPressed: () =>
+                                                  Navigator.pop(context, false),
+                                              child: Text('Cancel'),
+                                            ),
+                                            TextButton(
+                                              onPressed: () =>
+                                                  Navigator.pop(context, true),
+                                              child: Text(
+                                                'Delete',
+                                                style: TextStyle(
+                                                  color: Colors.red,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      );
+                                      if (confirm == true) {
+                                        await Provider.of<NewsProvider>(
+                                          context,
+                                          listen: false,
+                                        ).deleteNews(id);
+                                      }
+                                    },
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(4.0),
+                                      child: Icon(
+                                        Icons.delete_outline,
+                                        size: 20,
+                                        color: Colors.grey[600],
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                           ],
                         ),

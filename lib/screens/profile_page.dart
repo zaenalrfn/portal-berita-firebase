@@ -1,11 +1,15 @@
 import 'dart:io';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart' hide AuthProvider;
 import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
 import '../providers/auth_provider.dart';
 import '../models/user_model.dart';
+import '../providers/news_provider.dart';
 import '../services/cloudinary_service.dart';
+import '../widgets/guest_placeholder.dart';
+import '../providers/theme_provider.dart';
 
 class ProfilePage extends StatelessWidget {
   @override
@@ -15,31 +19,45 @@ class ProfilePage extends StatelessWidget {
 
     if (user == null) {
       return Scaffold(
-        body: Center(child: Text('Please login to view profile')),
+        appBar: AppBar(
+          backgroundColor: Colors.white,
+          elevation: 0,
+          leading: Navigator.of(context).canPop()
+              ? IconButton(
+                  icon: Icon(
+                    Icons.arrow_back_ios,
+                    color: Colors.black,
+                    size: 20,
+                  ),
+                  onPressed: () => Navigator.pop(context),
+                )
+              : null,
+        ),
+        backgroundColor: Colors.white,
+        body: GuestPlaceholder(
+          title: 'Profile Locked',
+          message: 'Login to view and edit your profile information.',
+          icon: Icons.person_off_outlined,
+        ),
       );
     }
 
     return Scaffold(
-      backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios, color: Colors.black, size: 20),
-          onPressed: () => Navigator.pop(context),
-        ),
+        leading: Navigator.of(context).canPop()
+            ? IconButton(
+                icon: Icon(Icons.arrow_back_ios, size: 20),
+                onPressed: () => Navigator.pop(context),
+              )
+            : null,
         centerTitle: true,
         title: Text(
           'Profile',
-          style: TextStyle(
-            color: Colors.black,
-            fontWeight: FontWeight.bold,
-            fontSize: 18,
-          ),
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
         ),
         actions: [
           IconButton(
-            icon: Icon(Icons.settings, color: Colors.black),
+            icon: Icon(Icons.settings),
             onPressed: () {
               // Optional: Settings menu could go here
             },
@@ -69,7 +87,7 @@ class ProfilePage extends StatelessWidget {
               style: TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
-                color: Colors.black87,
+                // color: Colors.black87, // Use theme default
               ),
             ),
             SizedBox(height: 4),
@@ -101,7 +119,11 @@ class ProfilePage extends StatelessWidget {
                 ),
                 child: Text(
                   'Edit Profile',
-                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                  ),
                 ),
               ),
             ),
@@ -126,6 +148,7 @@ class ProfilePage extends StatelessWidget {
 
                   // Email Item
                   _buildContactItem(
+                    context,
                     icon: Icons.email_outlined,
                     label: 'Email',
                     value: user.email,
@@ -134,11 +157,79 @@ class ProfilePage extends StatelessWidget {
 
                   // Password/Security Item (Custom addition for "Update Password")
                   _buildContactItem(
+                    context,
                     icon: Icons.lock_outline,
                     label: 'Security',
                     value: 'Update Password',
                     isLink: true,
                     onTap: () => _showChangePasswordDialog(context, auth),
+                  ),
+                ],
+              ),
+            ),
+
+            SizedBox(height: 30),
+
+            // Settings Section
+            // Settings Section
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'SETTINGS',
+                    style: TextStyle(
+                      color: Color(0xFF1E50F8),
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                  SizedBox(height: 16),
+                  Container(
+                    padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? Color(0xFF2C2C2C)
+                          : Colors.grey[50],
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Consumer<ThemeProvider>(
+                      builder: (context, themeProvider, _) {
+                        return SwitchListTile(
+                          contentPadding: EdgeInsets.zero,
+                          title: Text(
+                            'Dark Mode',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          secondary: Container(
+                            padding: EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: themeProvider.isDarkMode
+                                  ? Colors.grey[800]
+                                  : Color(0xFFE8EEFF),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Icon(
+                              Icons.dark_mode_outlined,
+                              color: themeProvider.isDarkMode
+                                  ? Colors.white
+                                  : Color(0xFF1E50F8),
+                              size: 20,
+                            ),
+                          ),
+                          value: themeProvider.isDarkMode,
+                          activeColor: Color(0xFF1E50F8),
+                          onChanged: (val) {
+                            themeProvider.toggleTheme(val);
+                          },
+                        );
+                      },
+                    ),
                   ),
                 ],
               ),
@@ -177,20 +268,22 @@ class ProfilePage extends StatelessWidget {
     );
   }
 
-  Widget _buildContactItem({
+  Widget _buildContactItem(
+    BuildContext context, {
     required IconData icon,
     required String label,
     required String value,
     bool isLink = false,
     VoidCallback? onTap,
   }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(12),
       child: Container(
         padding: EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: Colors.grey[50],
+          color: isDark ? Color(0xFF2C2C2C) : Colors.grey[50], // Dynamic bg
           borderRadius: BorderRadius.circular(12),
         ),
         child: Row(
@@ -198,7 +291,9 @@ class ProfilePage extends StatelessWidget {
             Container(
               padding: EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: Color(0xFFE8EEFF), // Light blue background for icon
+                color: isDark
+                    ? Color(0xFF1E1E1E)
+                    : Color(0xFFE8EEFF), // Dynamic icon bg
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Icon(icon, color: Color(0xFF1E50F8), size: 20),
@@ -218,7 +313,9 @@ class ProfilePage extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
-                      color: isLink ? Color(0xFF1E50F8) : Colors.black87,
+                      color: isLink
+                          ? Color(0xFF1E50F8)
+                          : (isDark ? Colors.white : Colors.black87),
                     ),
                   ),
                 ],
@@ -259,15 +356,135 @@ class ProfilePage extends StatelessWidget {
                   SnackBar(content: Text('Password updated successfully')),
                 );
               } catch (e) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('Error: $e'),
-                    backgroundColor: Colors.red,
-                  ),
-                );
+                if (e.toString().contains('requires-recent-login') ||
+                    (e is FirebaseAuthException &&
+                        e.code == 'requires-recent-login')) {
+                  Navigator.pop(ctx); // Close current dialog
+                  _showReauthDialog(context, auth, passCtrl.text);
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Error: $e'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                }
               }
             },
             child: Text('Update'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showReauthDialog(
+    BuildContext context,
+    AuthProvider auth,
+    String newPassword,
+  ) {
+    final currentPassCtrl = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text('Security Check'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text('Please enter your CURRENT password to continue.'),
+            SizedBox(height: 16),
+            TextField(
+              controller: currentPassCtrl,
+              decoration: InputDecoration(
+                labelText: 'Current Password',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              obscureText: true,
+            ),
+            SizedBox(height: 10),
+            Align(
+              alignment: Alignment.centerRight,
+              child: TextButton(
+                onPressed: () async {
+                  if (auth.user?.email != null) {
+                    Navigator.pop(ctx);
+                    try {
+                      await auth.resetPassword(auth.user!.email!);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            'Reset link sent to ${auth.user!.email}',
+                          ),
+                          backgroundColor: Colors.green,
+                        ),
+                      );
+                    } catch (e) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Error sending reset email: $e'),
+                          backgroundColor: Colors.red,
+                        ),
+                      );
+                    }
+                  }
+                },
+                child: Text(
+                  'Forgot Password?',
+                  style: TextStyle(color: Colors.red),
+                ),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              try {
+                final pwd = currentPassCtrl.text.trim();
+                if (pwd.isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Password cannot be empty'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                  return;
+                }
+
+                await auth.reauthenticate(pwd);
+                Navigator.pop(ctx); // Close reauth dialog
+
+                // Retry changing password
+                try {
+                  await auth.changePassword(newPassword);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Password updated successfully')),
+                  );
+                } catch (e) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Error updating password: $e'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                }
+              } catch (e) {
+                String msg = 'Incorrect password. Please try again.';
+                if (e is FirebaseAuthException) {
+                  msg = e.message ?? msg;
+                }
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(msg), backgroundColor: Colors.red),
+                );
+              }
+            },
+            child: Text('Confirm'),
           ),
         ],
       ),
@@ -416,6 +633,13 @@ class _EditProfileDialogState extends State<_EditProfileDialog> {
                       name: _nameCtrl.text.trim(),
                       photoUrl: newPhotoUrl,
                     );
+
+                    // Refresh news to reflect name change locally/immediately
+                    await Provider.of<NewsProvider>(
+                      context,
+                      listen: false,
+                    ).fetchFirstPage();
+
                     Navigator.pop(context);
                   } catch (e) {
                     setState(() => _uploading = false);

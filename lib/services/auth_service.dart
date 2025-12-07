@@ -48,6 +48,48 @@ class AuthService {
     if (updates.isNotEmpty) {
       await _db.collection('users').doc(user.uid).update(updates);
     }
+
+    // Proactive update: Propagate name change to all authored news and comments
+    // Proactive update: Propagate name change to all authored news and comments
+    if (name != null) {
+      // 1. Update authored news
+      try {
+        final newsQuery = await _db
+            .collection('news')
+            .where('authorId', isEqualTo: user.uid)
+            .get();
+
+        if (newsQuery.docs.isNotEmpty) {
+          final batch = _db.batch();
+          for (var doc in newsQuery.docs) {
+            batch.update(doc.reference, {'authorName': name});
+          }
+          await batch.commit();
+        }
+      } catch (e) {
+        print('Error updating news authors: $e');
+      }
+
+      // 2. Update comments (using collection group)
+      try {
+        final commentsQuery = await _db
+            .collectionGroup('comments')
+            .where('userId', isEqualTo: user.uid)
+            .get();
+
+        if (commentsQuery.docs.isNotEmpty) {
+          final batch = _db.batch();
+          for (var doc in commentsQuery.docs) {
+            batch.update(doc.reference, {'userName': name});
+          }
+          await batch.commit();
+        }
+      } catch (e) {
+        print('Error updating comments: $e');
+        // This fails if the necessary Composite Index is missing for CollectionGroup queries
+        // Instructions: Check debug console for link to create index if this fails.
+      }
+    }
   }
 
   Future<void> updatePassword(String newPassword) async {
@@ -55,5 +97,20 @@ class AuthService {
     if (user != null) {
       await user.updatePassword(newPassword);
     }
+  }
+
+  Future<void> reauthenticate(String password) async {
+    final user = _auth.currentUser;
+    if (user != null && user.email != null) {
+      final cred = EmailAuthProvider.credential(
+        email: user.email!,
+        password: password,
+      );
+      await user.reauthenticateWithCredential(cred);
+    }
+  }
+
+  Future<void> sendPasswordResetEmail(String email) async {
+    await _auth.sendPasswordResetEmail(email: email);
   }
 }

@@ -79,4 +79,12 @@ class AuthProvider extends ChangeNotifier {
   Future<void> changePassword(String newPassword) async {
     await _service.updatePassword(newPassword);
   }
+
+  Future<void> reauthenticate(String password) async {
+    await _service.reauthenticate(password);
+  }
+
+  Future<void> resetPassword(String email) async {
+    await _service.sendPasswordResetEmail(email);
+  }
 }

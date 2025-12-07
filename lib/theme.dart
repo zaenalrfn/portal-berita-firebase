@@ -20,4 +20,44 @@ class AppTheme {
       ),
     ),
   );
+
+  static final ThemeData darkTheme = ThemeData(
+    scaffoldBackgroundColor: Color(0xFF121212),
+    primaryColor: navy,
+    colorScheme:
+        ColorScheme.fromSwatch(
+          primarySwatch: Colors.blue,
+          brightness: Brightness.dark,
+        ).copyWith(
+          primary: navy,
+          secondary: Colors.blueAccent,
+          surface: Color(0xFF1E1E1E),
+        ),
+    appBarTheme: AppBarTheme(
+      backgroundColor: Color(0xFF1E1E1E),
+      foregroundColor: Colors.white,
+      elevation: 0,
+    ),
+    cardColor: Color(0xFF1E1E1E),
+    textTheme: TextTheme(
+      bodyLarge: TextStyle(color: Colors.white),
+      bodyMedium: TextStyle(color: Colors.white70),
+    ),
+    elevatedButtonTheme: ElevatedButtonThemeData(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: navy,
+        foregroundColor: Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      ),
+    ),
+    inputDecorationTheme: InputDecorationTheme(
+      fillColor: Color(0xFF2C2C2C),
+      filled: true,
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide.none,
+      ),
+      hintStyle: TextStyle(color: Colors.grey[600]),
+    ),
+  );
 }

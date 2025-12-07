@@ -4,6 +4,8 @@ import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import '../providers/auth_provider.dart';
 import '../providers/bookmark_provider.dart';
+import '../widgets/user_display.dart';
+import '../widgets/guest_placeholder.dart';
 
 class BookmarksPage extends StatelessWidget {
   String _formatTimeAgo(dynamic date) {
@@ -38,34 +40,51 @@ class BookmarksPage extends StatelessWidget {
 
     if (!auth.isAuthenticated) {
       return Scaffold(
+        // backgroundColor: Colors.white, // Use theme
         appBar: AppBar(
           title: Text('Saved'),
-          backgroundColor: Colors.white,
+          // backgroundColor: Colors.white, // Use theme
           elevation: 0,
-          foregroundColor: Colors.black,
+          // foregroundColor: Colors.black, // Use theme
+          leading: Navigator.of(context).canPop()
+              ? IconButton(
+                  icon: Icon(
+                    Icons.arrow_back_ios,
+                    // color: Colors.black, // Use theme
+                    size: 20,
+                  ),
+                  onPressed: () => Navigator.pop(context),
+                )
+              : null,
         ),
-        body: Center(child: Text('Login to view saved articles')),
+        body: GuestPlaceholder(
+          title: 'Save Articles',
+          message: 'Join us to save your favorite articles for later reading.',
+          icon: Icons.bookmark_border,
+        ),
       );
     }
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      // backgroundColor: Colors.white, // Use theme
       appBar: AppBar(
         title: Text(
           'Saved Articles',
           style: TextStyle(
             fontWeight: FontWeight.bold,
             fontSize: 18,
-            color: Colors.black,
+            // color: Colors.black, // Use theme
           ),
         ),
         centerTitle: true,
-        backgroundColor: Colors.white,
+        // backgroundColor: Colors.white, // Use theme
         elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios, color: Colors.black, size: 20),
-          onPressed: () => Navigator.pop(context),
-        ),
+        leading: Navigator.of(context).canPop()
+            ? IconButton(
+                icon: Icon(Icons.arrow_back_ios, size: 20),
+                onPressed: () => Navigator.pop(context),
+              )
+            : null,
       ),
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
@@ -172,6 +191,9 @@ class BookmarksPage extends StatelessWidget {
     BookmarkProvider bookmarkProv,
     dynamic date,
   ) {
+    // Dynamic colors
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Container(
       color: Colors.transparent, // For hit testing
       height: 90, // Fixed height for consistent look like mockup
@@ -184,7 +206,7 @@ class BookmarksPage extends StatelessWidget {
             height: 90,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(12),
-              color: Colors.grey[200],
+              color: isDark ? Colors.grey[800] : Colors.grey[200],
               image:
                   (data['coverUrl'] != null &&
                       (data['coverUrl'] as String).isNotEmpty)
@@ -230,7 +252,7 @@ class BookmarksPage extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.bold,
-                        color: Colors.black87,
+                        // color: Colors.black87, // Use theme
                         height: 1.2,
                       ),
                     ),
@@ -241,9 +263,25 @@ class BookmarksPage extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      '${data['authorName'] ?? 'Unknown'} • ${_formatTimeAgo(date)}',
-                      style: TextStyle(fontSize: 11, color: Colors.grey),
+                    Expanded(
+                      child: Row(
+                        children: [
+                          Flexible(
+                            child: UserDisplay(
+                              userId: data['authorId'] ?? '',
+                              fallbackName: data['authorName'] ?? 'Unknown',
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: Colors.grey,
+                              ),
+                            ),
+                          ),
+                          Text(
+                            ' • ${_formatTimeAgo(date)}',
+                            style: TextStyle(fontSize: 11, color: Colors.grey),
+                          ),
+                        ],
+                      ),
                     ),
 
                     // Delete Icon

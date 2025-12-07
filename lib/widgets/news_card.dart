@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../providers/bookmark_provider.dart';
 import '../providers/auth_provider.dart';
 import '../widgets/auth_dialog.dart';
+import '../widgets/user_display.dart';
 
 class NewsCard extends StatelessWidget {
   final String id;
@@ -10,13 +11,16 @@ class NewsCard extends StatelessWidget {
   final String excerpt;
   final String? coverUrl;
   final String authorName;
+  final String authorId;
   final Map<String, dynamic>? meta;
+
   NewsCard({
     required this.id,
     required this.title,
     required this.excerpt,
     this.coverUrl,
     required this.authorName,
+    required this.authorId,
     this.meta,
   });
 
@@ -28,12 +32,15 @@ class NewsCard extends StatelessWidget {
     // setUid logic moved to ProxyProvider in main app
 
     final isBook = bookmarkProv.bookmarkedIds.contains(id);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return InkWell(
       onTap: () {
         Navigator.pushNamed(context, '/detail', arguments: {'id': id});
       },
       child: Card(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        // color: Colors.white, // Inherits from CardTheme which uses theme.cardColor
         child: Row(
           children: [
             Container(
@@ -44,7 +51,7 @@ class NewsCard extends StatelessWidget {
                   topLeft: Radius.circular(12),
                   bottomLeft: Radius.circular(12),
                 ),
-                color: Colors.grey.shade200,
+                color: isDark ? Colors.grey[800] : Colors.grey.shade200,
                 image: (coverUrl != null && coverUrl!.isNotEmpty)
                     ? DecorationImage(
                         image: NetworkImage(coverUrl!),
@@ -69,8 +76,10 @@ class NewsCard extends StatelessWidget {
                     Row(
                       children: [
                         Expanded(
-                          child: Text(
-                            'by ' + authorName,
+                          child: UserDisplay(
+                            userId: authorId,
+                            fallbackName: authorName,
+                            prefix: 'by ',
                             style: TextStyle(fontSize: 12, color: Colors.grey),
                           ),
                         ),
@@ -91,6 +100,7 @@ class NewsCard extends StatelessWidget {
                                 'title': title,
                                 'coverUrl': coverUrl,
                                 'authorName': authorName,
+                                'authorId': authorId,
                               });
                             } catch (e) {
                               ScaffoldMessenger.of(context).showSnackBar(
