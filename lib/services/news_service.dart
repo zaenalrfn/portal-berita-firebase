@@ -5,14 +5,6 @@ import 'package:uuid/uuid.dart';
 class NewsService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
 
-  /// Create a news document in collection `news`.
-  /// Expects `data` to contain fields like:
-  /// - title (String)
-  /// - content (String)
-  /// - authorId (String)
-  /// - authorName (String)
-  /// - coverUrl (String?) optional (Cloudinary secure_url)
-  /// - publicId (String?) optional (Cloudinary public_id if you store it)
   Future<void> createNews(Map<String, dynamic> data) async {
     final id = Uuid().v4();
     data['createdAt'] = FieldValue.serverTimestamp();
